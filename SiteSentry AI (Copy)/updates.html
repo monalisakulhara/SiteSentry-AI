@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Updater - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Smart Updater</h1>
+                        <p class="text-gray-600">View update history and manage component updates.</p>
+                    </div>
+                     <button id="manual-update-btn" class="bg-primary border border-gray-300 hover:bg-blue-700 hover:text-white text-blue text-center font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i>
+                        Check for Updates
+                    </button>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4">Update History</h2>
+                    <div id="update-list" class="overflow-x-auto">
+                        <p class="text-gray-500">Loading update history...</p>
+                        </div>
+                </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+            const updateListDiv = document.getElementById('update-list');
+            const manualUpdateBtn = document.getElementById('manual-update-btn');
+
+            async function loadUpdateHistory() {
+                updateListDiv.innerHTML = '<p class="text-gray-500">Loading update history...</p>';
+                try {
+                    // TODO: Create GET /api/updates route
+                    const response = await axios.get('/api/updates', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const updates = response.data;
+
+                    if (!updates || updates.length === 0) {
+                        updateListDiv.innerHTML = '<p class="text-gray-500">No update history found.</p>';
+                        return;
+                    }
+
+                    updateListDiv.innerHTML = `
+                         <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr><th ...>Date</th><th ...>Component</th><th ...>Status</th><th ...>Details</th></tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${updates.map(u => {
+                                    let statusColor = 'gray';
+                                    if (u.status === 'success') statusColor = 'green';
+                                    if (u.status === 'rolled-back') statusColor = 'yellow';
+                                    if (u.status === 'failed') statusColor = 'red';
+                                    
+                                    return `
+                                    <tr>
+                                        <td ...>${new Date(u.createdAt).toLocaleString()}</td>
+                                        <td ...>${u.plugin || 'N/A'}</td>
+                                        <td ...>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${statusColor}-100 text-${statusColor}-800">
+                                                ${u.status}
+                                            </span>
+                                        </td>
+                                        <td ...>${u.error || (u.diffPercentage ? `Diff: ${u.diffPercentage}%` : 'OK')}</td>
+                                    </tr>
+                                `}).join('')}
+                            </tbody></table>`;
+                    feather.replace();
+                } catch (error) {
+                    console.error("Error loading updates:", error);
+                    updateListDiv.innerHTML = '<p class="text-red-500">Failed to load update history.</p>';
+                }
+            }
+
+            // Manual update button
+             manualUpdateBtn.addEventListener('click', async () => {
+                 if (!confirm('Run the Smart Updater now? This may take several minutes.')) return;
+                 manualUpdateBtn.disabled = true;
+                 manualUpdateBtn.innerHTML = '<i data-feather="loader" class="animate-spin w-5 h-5 mr-2"></i>Updating...';
+                 feather.replace();
+                 try {
+                     // This calls the route you already have in automation.js
+                     await axios.post('/api/automation/run-updates', {}, { headers: { 'Authorization': `Bearer ${token}` } });
+                     alert('Update process initiated. Refreshing list...');
+                     loadUpdateHistory();
+                 } catch (error) {
+                     console.error("Error initiating manual update:", error);
+                     alert(error.response?.data?.error || 'Failed to start update.');
+                 } finally {
+                     manualUpdateBtn.disabled = false;
+                     manualUpdateBtn.innerHTML = '<i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i>Check for Updates';
+                     feather.replace();
+                 }
+             });
+
+
+            loadUpdateHistory(); // Initial load
+        });
+    </script>
+</body>
+</html>

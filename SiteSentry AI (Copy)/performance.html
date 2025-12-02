@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Performance</h1>
+                    <p class="text-gray-600">Analyze your website's speed and optimization.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Response Time History</h3>
+                        <canvas id="perf-response-chart" height="300"></canvas>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">PageSpeed Scores (Placeholder)</h3>
+                         <div class="flex justify-around items-center h-full">
+                             <div class="text-center">
+                                 <div class="text-4xl font-bold text-green-600">95</div>
+                                 <div class="text-gray-500">Mobile</div>
+                             </div>
+                              <div class="text-center">
+                                 <div class="text-4xl font-bold text-green-600">98</div>
+                                 <div class="text-gray-500">Desktop</div>
+                             </div>
+                         </div>
+                         <p class="text-xs text-center text-gray-400 mt-4">Integration with Google PageSpeed needed</p>
+                    </div>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4">Optimization Suggestions (Placeholder)</h2>
+                    <ul class="list-disc list-inside space-y-2 text-gray-600">
+                        <li>Consider compressing images further.</li>
+                        <li>Enable browser caching for static assets.</li>
+                        <li>Minify CSS and JavaScript files.</li>
+                        <li>Leverage a Content Delivery Network (CDN).</li>
+                    </ul>
+                </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+             // --- Chart Setup ---
+            const responseCtx = document.getElementById('perf-response-chart');
+            let responseChart;
+
+             function initializeChart() {
+                if (responseChart) responseChart.destroy();
+                responseChart = new Chart(responseCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Response Time (ms)', data: [], borderColor: '#10B981', tension: 0.1, fill: false }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
+            }
+
+            async function loadPerformanceData() {
+                initializeChart();
+                try {
+                    // Fetch history data (charts) from the same monitoring route
+                    const historyRes = await axios.get('/api/monitoring/history', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const history = historyRes.data;
+
+                    responseChart.data.labels = history.labels || [];
+                    responseChart.data.datasets[0].data = history.responseData || [];
+                    responseChart.update();
+
+                    // NOTE: PageSpeed data remains placeholder unless you integrate a new API call
+                } catch (error) {
+                    console.error("Error loading performance data:", error);
+                }
+            }
+
+            loadPerformanceData(); // Initial load
+        });
+    </script>
+</body>
+</html>

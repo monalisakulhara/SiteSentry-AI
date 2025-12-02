@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Support Center</h1>
+                    <p class="text-gray-600">How can we help you today?</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h2 class="text-xl font-bold mb-4">Send Us a Message</h2>
+                        <form id="support-form" class="space-y-4">
+                            <div>
+                                <label for="support-email" class="block text-sm font-medium text-gray-700">Your Email</label>
+                                <input type="email" id="support-email" class="w-full px-3 py-2 border rounded-lg bg-gray-100" readonly>
+                            </div>
+                            <div>
+                                <label for="support-subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                                <input type="text" id="support-subject" class="w-full px-3 py-2 border rounded-lg" required>
+                            </div>
+                            <div>
+                                <label for="support-message" class="block text-sm font-medium text-gray-700">Message</label>
+                                <textarea id="support-message" rows="5" class="w-full px-3 py-2 border rounded-lg" required></textarea>
+                            </div>
+                            <div id="support-message-area" class="text-sm"></div>
+                            <button type="submit" class="bg-primary border border-gray-300 hover:bg-blue-600 text-black font-bold py-2 px-4 rounded-lg">Send Message</button>
+                        </form>
+                    </div>
+
+                     <div class="space-y-6">
+                         <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h2 class="text-xl font-bold mb-4">Knowledge Base</h2>
+                            <p class="text-gray-600 mb-4">Find answers to common questions and tutorials in our help center.</p>
+                            <a href="/help" target="_blank" class="text-primary font-medium hover:underline">Go to Help Center &rarr;</a>
+                         </div>
+                         <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h2 class="text-xl font-bold mb-4">Contact Info</h2>
+                             <p class="text-gray-600 mb-2"><i data-feather="mail" class="inline w-4 h-4 mr-2"></i> support@sitesentryai.com</p>
+                             <p class="text-gray-600"><i data-feather="phone" class="inline w-4 h-4 mr-2"></i> (800) 555-5678 (Mon-Fri 9am-6pm EST)</p>
+                         </div>
+                    </div>
+                </div>
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+            const supportForm = document.getElementById('support-form');
+            const supportEmailEl = document.getElementById('support-email');
+            const supportMessageArea = document.getElementById('support-message-area');
+
+             // Pre-fill email (needs /api/users/me route)
+            async function loadEmail() {
+                 try {
+                     const response = await axios.get('/api/users/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                     if(supportEmailEl) supportEmailEl.value = response.data.email || '';
+                 } catch (error) {
+                     console.error("Error loading user email:", error);
+                 }
+            }
+
+            // Handle support form submission
+            if(supportForm) {
+                supportForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    supportMessageArea.textContent = 'Sending...'; supportMessageArea.style.color = 'gray';
+                    const subject = document.getElementById('support-subject').value;
+                    const message = document.getElementById('support-message').value;
+
+                    try {
+                        // TODO: Create POST /api/support/ticket route
+                        await axios.post('/api/support/ticket',
+                            { subject, message },
+                            { headers: { 'Authorization': `Bearer ${token}` } }
+                        );
+                        supportMessageArea.textContent = 'Message sent successfully! We will get back to you soon.';
+                        supportMessageArea.style.color = 'green';
+                        supportForm.reset();
+                        // Pre-fill email again after reset
+                        loadEmail();
+                    } catch (error) {
+                         console.error("Error sending support message:", error);
+                         supportMessageArea.textContent = error.response?.data?.error || 'Failed to send message.';
+                         supportMessageArea.style.color = 'red';
+                    }
+                });
+            }
+
+            loadEmail(); // Initial load
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backups - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Website Backups</h1>
+                        <p class="text-gray-600">Manage and restore your website backups.</p>
+                    </div>
+                    <button id="manual-backup-btn" class="bg-secondary border border-green-600 hover:bg-green-600 hover:text-white text-green font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i data-feather="plus-circle" class="w-5 h-5 mr-2"></i>
+                        Run Manual Backup
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4">Backup History</h2>
+                    <div id="backup-list" class="overflow-x-auto">
+                        <p class="text-gray-500">Loading backup history...</p>
+                        </div>
+                </div>
+
+                <div id="restore-confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden flex items-center justify-center">
+                   <div class="relative mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+                        <h3 class="text-lg font-bold mb-4 text-red-600">Confirm Restore</h3>
+                        <p class="mb-4">Are you sure you want to restore from backup <strong id="restore-backup-date"></strong>? This will overwrite your current live site.</p>
+                        <div id="restore-message-area" class="text-sm mb-4"></div>
+                        <div class="flex justify-end gap-3">
+                            <button id="cancel-restore-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Cancel</button>
+                            <button id="confirm-restore-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Confirm Restore</button>
+                        </div>
+                   </div>
+                </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script> <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+            const backupListDiv = document.getElementById('backup-list');
+            const manualBackupBtn = document.getElementById('manual-backup-btn');
+            const restoreModal = document.getElementById('restore-confirm-modal');
+            const cancelRestoreBtn = document.getElementById('cancel-restore-btn');
+            const confirmRestoreBtn = document.getElementById('confirm-restore-btn');
+            const restoreBackupDateEl = document.getElementById('restore-backup-date');
+            const restoreMessageArea = document.getElementById('restore-message-area');
+            let selectedBackupId = null;
+
+            async function loadBackups() {
+                backupListDiv.innerHTML = '<p class="text-gray-500">Loading backup history...</p>';
+                try {
+                    // TODO: Create GET /api/backups route
+                    const response = await axios.get('/api/backups', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const backups = response.data;
+
+                    if (!backups || backups.length === 0) {
+                        backupListDiv.innerHTML = '<p class="text-gray-500">No backups found yet.</p>';
+                        return;
+                    }
+
+                    backupListDiv.innerHTML = `
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left ...">Date</th>
+                                    <th class="px-6 py-3 text-left ...">Status</th>
+                                    <th class="px-6 py-3 text-left ...">Size</th>
+                                    <th class="relative px-6 py-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${backups.map(b => `
+                                    <tr>
+                                        <td class="px-6 py-4 ...">${new Date(b.createdAt).toLocaleString()}</td>
+                                        <td class="px-6 py-4 ...">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${b.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                                ${b.status}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 ...">${b.size ? (b.size / (1024*1024)).toFixed(2) + ' MB' : '--'}</td>
+                                        <td class="px-6 py-4 text-right ...">
+                                            ${b.status === 'success' ? `<button onclick="openRestoreModal('${b._id}', '${new Date(b.createdAt).toLocaleString()}')" class="text-primary hover:text-blue-700">Restore</button>` : ''}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                    feather.replace();
+                } catch (error) {
+                    console.error("Error loading backups:", error);
+                    backupListDiv.innerHTML = '<p class="text-red-500">Failed to load backup history.</p>';
+                }
+            }
+
+            // Function to open restore modal
+            window.openRestoreModal = (backupId, backupDate) => {
+                selectedBackupId = backupId;
+                restoreBackupDateEl.textContent = backupDate;
+                restoreMessageArea.textContent = '';
+                restoreModal.classList.remove('hidden');
+            }
+
+            // Modal close buttons
+            cancelRestoreBtn.addEventListener('click', () => restoreModal.classList.add('hidden'));
+            restoreModal.addEventListener('click', (e) => { if(e.target === restoreModal) restoreModal.classList.add('hidden'); });
+
+            // Confirm restore action
+            confirmRestoreBtn.addEventListener('click', async () => {
+                if (!selectedBackupId) return;
+                restoreMessageArea.textContent = 'Initiating restore...';
+                restoreMessageArea.style.color = 'gray';
+                try {
+                     // TODO: Create POST /api/backups/:id/restore route
+                     await axios.post(`/api/backups/${selectedBackupId}/restore`, {}, { headers: { 'Authorization': `Bearer ${token}` } });
+                     restoreMessageArea.textContent = 'Restore initiated successfully. Please wait a few minutes for completion.';
+                     restoreMessageArea.style.color = 'green';
+                     setTimeout(() => restoreModal.classList.add('hidden'), 3000);
+                } catch (error) {
+                    console.error("Error restoring backup:", error);
+                    restoreMessageArea.textContent = error.response?.data?.error || 'Failed to initiate restore.';
+                    restoreMessageArea.style.color = 'red';
+                }
+            });
+
+             // Manual backup button
+             manualBackupBtn.addEventListener('click', async () => {
+                if (!confirm('Run a manual backup now?')) return;
+                manualBackupBtn.disabled = true;
+                manualBackupBtn.textContent = 'Backing up...';
+                try {
+                    // TODO: Create POST /api/backups route (or use automation one?)
+                    await axios.post('/api/automation/run-backups', {}, { headers: { 'Authorization': `Bearer ${token}` } }); // Adjust endpoint if needed
+                    alert('Manual backup initiated. It may take a few minutes. Refreshing list...');
+                    loadBackups();
+                } catch (error) {
+                    console.error("Error initiating manual backup:", error);
+                    alert('Failed to start manual backup.');
+                } finally {
+                    manualBackupBtn.disabled = false;
+                    manualBackupBtn.innerHTML = '<i data-feather="plus-circle" class="w-5 h-5 mr-2"></i>Run Manual Backup';
+                    feather.replace();
+                }
+             });
+
+            loadBackups(); // Initial load
+        });
+    </script>
+</body>
+</html>

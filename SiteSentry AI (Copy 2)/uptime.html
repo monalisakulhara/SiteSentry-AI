@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uptime Monitoring - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Uptime Monitoring</h1>
+                    <p class="text-gray-600">Detailed uptime history and performance.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <p class="text-gray-500">Current Status</p>
+                        <h3 class="text-2xl font-bold" id="current-status">--</h3>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <p class="text-gray-500">Uptime (Last 30d)</p>
+                        <h3 class="text-2xl font-bold" id="uptime-30d">-- %</h3>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <p class="text-gray-500">Total Downtime (Last 30d)</p>
+                        <h3 class="text-2xl font-bold" id="downtime-30d">--</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <p class="text-gray-500">Avg Response Time (Last 30d)</p>
+                        <h3 class="text-2xl font-bold" id="avg-response-30d">-- ms</h3>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Uptime History (Last 30 Days)</h3>
+                        <canvas id="uptime-history-chart" height="300"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Response Times (Last 30 Days)</h3>
+                        <canvas id="response-history-chart" height="300"></canvas>
+                    </div>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4">Downtime Events (Last 30 Days)</h2>
+                    <div id="downtime-log">
+                        <p class="text-gray-500">Loading downtime events...</p>
+                        </div>
+                </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+            // --- Chart Setup (Example) ---
+            const uptimeCtx = document.getElementById('uptime-history-chart');
+            const responseCtx = document.getElementById('response-history-chart');
+            let uptimeChart, responseChart; // Define chart variables
+
+            function initializeCharts() {
+                // Destroy previous charts if they exist
+                if (uptimeChart) uptimeChart.destroy();
+                if (responseChart) responseChart.destroy();
+
+                uptimeChart = new Chart(uptimeCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Uptime %', data: [], borderColor: '#3B82F6', tension: 0.1, fill: false }] }, options: { responsive: true, scales: { y: { beginAtZero: false, max: 100 } } } });
+                responseChart = new Chart(responseCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Response Time (ms)', data: [], borderColor: '#10B981', tension: 0.1, fill: false }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } });
+            }
+
+            async function loadUptimeData() {
+                initializeCharts(); // Reset charts
+                // Set loading states
+                document.getElementById('current-status').textContent = 'Loading...';
+                document.getElementById('uptime-30d').textContent = '-- %';
+                document.getElementById('downtime-30d').textContent = '--';
+                document.getElementById('avg-response-30d').textContent = '-- ms';
+                document.getElementById('downtime-log').innerHTML = '<p class="text-gray-500">Loading downtime events...</p>';
+
+                try {
+                    // Fetch history data (charts)
+                    const historyRes = await axios.get('/api/monitoring/history', { headers: { 'Authorization': `Bearer ${token}` } });
+                    // Fetch events data (summary stats and event log)
+                    const eventsRes = await axios.get('/api/monitoring/events', { headers: { 'Authorization': `Bearer ${token}` } });
+
+                    const summary = eventsRes.data.summary;
+                    const history = historyRes.data;
+                    const events = eventsRes.data.events;
+
+                    // Update Stats
+                    document.getElementById('current-status').textContent = summary.currentStatus || 'N/A';
+                    document.getElementById('uptime-30d').textContent = `${summary.uptimePercentage?.toFixed(2) || '--'} %`;
+                    document.getElementById('downtime-30d').textContent = summary.totalDowntime || '--';
+                    document.getElementById('avg-response-30d').textContent = `${summary.avgResponseTime?.toFixed(0) || '--'} ms`;
+
+                    // Update Charts
+                    uptimeChart.data.labels = history.labels || [];
+                    uptimeChart.data.datasets[0].data = history.uptimeData || [];
+                    responseChart.data.labels = history.labels || [];
+                    responseChart.data.datasets[0].data = history.responseData || [];
+                    uptimeChart.update();
+                    responseChart.update();
+
+                    // Update Downtime Log
+                    if (!events || events.length === 0) {
+                        document.getElementById('downtime-log').innerHTML = '<p class="text-gray-500">No downtime events recorded in the last 30 days.</p>';
+                    } else {
+                        document.getElementById('downtime-log').innerHTML = `
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left">Start Time</th><th class="px-6 py-3 text-left">End Time</th><th class="px-6 py-3 text-left">Duration</th></tr></thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                ${events.map(e => `
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${new Date(e.startTime).toLocaleString()}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${e.endTime ? new Date(e.endTime).toLocaleString() : 'Ongoing'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${e.duration || '--'}</td>
+                                    </tr>`).join('')}
+                                </tbody></table>`;
+                    }
+
+                } catch (error) {
+                    console.error("Error loading uptime data:", error);
+                    // Handle error states
+                    document.getElementById('current-status').textContent = 'ERROR';
+                }
+            }
+
+            loadUptimeData(); // Initial load
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Plan - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+
+    <section id="pricing" class="py-24 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4">Choose Your Plan</h1>
+            <p class="text-center text-gray-600 mb-16">All plans include a 14-day free trial. Cancel anytime.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition duration-300 border border-gray-200 text-center">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Basic</h3>
+                    <p class="text-gray-600 mb-6">Perfect for small websites</p>
+                    <div class="text-5xl font-bold text-gray-800 mb-6">$19<span class="text-lg font-normal">/month</span></div>
+                    <ul class="space-y-3 mb-8 text-left">
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Security Scanning</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Daily Backups</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Uptime Monitoring</span></li>
+                        <li class="flex items-center text-gray-400"><i data-feather="x" class="text-red-400 mr-2 w-5 h-5"></i><span>No AI Content Assistant</span></li>
+                    </ul>
+                    <button data-plan="basic" class="select-plan-btn block w-full bg-blue-600 border border-blue-300 hover:bg-white hover:text-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-300">Start Free Trial</button>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-md border-2 border-primary relative text-center">
+                    <div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg">MOST POPULAR</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Pro</h3>
+                    <p class="text-gray-600 mb-6">For growing businesses</p>
+                    <div class="text-5xl font-bold text-gray-800 mb-6">$49<span class="text-lg font-normal">/month</span></div>
+                    <ul class="space-y-3 mb-8 text-left">
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Everything in Basic</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Smart Updater</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>AI Content Assistant</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Priority Support</span></li>
+                    </ul>
+                    <button data-plan="pro" class="select-plan-btn block w-full bg-blue-600 border border-blue-300 hover:bg-white hover:text-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-300">Start Free Trial</button>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition duration-300 border border-gray-200 text-center">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">Agency</h3>
+                    <p class="text-gray-600 mb-6">For web professionals</p>
+                    <div class="text-5xl font-bold text-gray-800 mb-6">$199<span class="text-lg font-normal">/month</span></div>
+                    <ul class="space-y-3 mb-8 text-left">
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Everything in Pro</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>Manage Multiple Sites</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>White Label Reports</span></li>
+                        <li class="flex items-center"><i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i><span>24/7 VIP Support</span></li>
+                    </ul>
+                    <button data-plan="agency" class="select-plan-btn block w-full bg-blue-600 border border-blue-300 hover:bg-white hover:text-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-300">Start Free Trial</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <custom-footer></custom-footer>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        feather.replace();
+
+        // NOTE: In a real app, this would initiate a call to a payment API.
+        // For this assignment, we will simply log the plan and redirect the user to the dashboard.
+
+        // ... (keep feather.replace() and the note) ...
+
+        document.querySelectorAll('.select-plan-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const plan = e.currentTarget.getAttribute('data-plan');
+                const token = localStorage.getItem('siteSentryToken');
+
+                if (!token) {
+                    // Not logged in, redirect
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Disable the button to prevent multiple clicks
+                button.disabled = true;
+                button.textContent = 'Saving...';
+
+                try {
+                    // Call the new API endpoint
+                    await axios.put('/api/users/me/plan', 
+                        { plan: plan }, // Data to send
+                        { headers: { 'Authorization': `Bearer ${token}` } } // Auth header
+                    );
+
+                    // Success!
+                    alert(`Plan selected: ${plan.toUpperCase()}. Redirecting to dashboard.`);
+                    window.location.href = '/dashboard.html';
+
+                } catch (error) {
+                    console.error('Failed to save plan:', error);
+                    alert('An error occurred while saving your plan. Please try again.');
+                    // Re-enable the button on failure
+                    button.disabled = false;
+                    button.textContent = 'Start Free Trial';
+                }
+            });
+        });
+
+        // Check if user is logged in (optional, but good practice)
+        // ... (this part can stay as-is) ...
+
+        // Check if user is logged in (optional, but good practice)
+        document.addEventListener('DOMContentLoaded', () => {
+             const token = localStorage.getItem('siteSentryToken');
+             if (!token) {
+                 // If no token, redirect them to login first
+                 window.location.href = '/login.html';
+             }
+        });
+
+    </script>
+</body>
+</html>
