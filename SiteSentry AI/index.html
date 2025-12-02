@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiteSentry AI - Your 24/7 Website Mechanic</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    
+    <!-- Hero Section -->
+    <section id="hero" class="relative overflow-hidden">
+        <div class="vanta-bg absolute inset-0 z-0"></div>
+        <div class="container mx-auto px-6 py-24 md:py-32 relative z-10">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">Keep Your Website Running Smoothly, 24/7</h1>
+                <p class="text-xl md:text-2xl text-white opacity-90 mb-10">Automated updates, security, backups, and uptime monitoring – all in one simple dashboard.</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <a href="/login.html" class="bg-accent hover:bg-yellow-600 text-white font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">Start Free Trial</a>
+<a href="#features" class="bg-white hover:bg-gray-100 text-primary font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg">Learn More</a>
+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Powerful Features That Simplify Website Management</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <!-- Feature 1 -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition duration-300">
+                    <div class="w-16 h-16 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-6">
+                        <i data-feather="refresh-cw" class="text-primary w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Smart Updater</h3>
+                    <p class="text-gray-600">Automatic updates with a safety backup and rollback feature to prevent any issues.</p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition duration-300">
+                    <div class="w-16 h-16 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6">
+                        <i data-feather="shield" class="text-secondary w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Digital Bouncer</h3>
+                    <p class="text-gray-600">Continuous malware scanning and firewall protection to keep hackers at bay.</p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-sm hover:shadow-md transition duration-300">
+                    <div class="w-16 h-16 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mb-6">
+                        <i data-feather="clock" class="text-accent w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Time Machine</h3>
+                    <p class="text-gray-600">Daily backups stored securely off-site with simple one-click restore functionality.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">How SiteSentry AI Keeps Your Website Healthy</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i data-feather="download" class="text-primary w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Smart Updates</h3>
+                    <p class="text-gray-600">Updates plugins and themes safely without breaking your site.</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i data-feather="eye" class="text-secondary w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Security Monitoring</h3>
+                    <p class="text-gray-600">24/7 monitoring and protection against security threats.</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i data-feather="hard-drive" class="text-accent w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Automated Backups</h3>
+                    <p class="text-gray-600">Daily backups with a simple rollback feature when needed.</p>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="text-center">
+                    <div class="w-20 h-20 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mb-6 mx-auto">
+                        <i data-feather="activity" class="text-primary w-10 h-10"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-3">Uptime Monitoring</h3>
+                    <p class="text-gray-600">Instant alerts if your website goes down for any reason.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">What Our Customers Say</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 p-8 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-full flex items-center justify-center mr-4">
+                            <i data-feather="user" class="text-primary"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Sarah J.</h4>
+                            <p class="text-sm text-gray-500">Small Business Owner</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Since using SiteSentry AI, I haven't had to worry about my website breaking. It just works!"</p>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 p-8 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-secondary bg-opacity-10 rounded-full flex items-center justify-center mr-4">
+                            <i data-feather="user" class="text-secondary"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Mike T.</h4>
+                            <p class="text-sm text-gray-500">Local Restaurant</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"The automated backups saved me when my site got hacked. One click and I was back online!"</p>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 p-8 rounded-xl">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-accent bg-opacity-10 rounded-full flex items-center justify-center mr-4">
+                            <i data-feather="user" class="text-accent"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-800">Lisa M.</h4>
+                            <p class="text-sm text-gray-500">Online Store</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Finally a service that explains things in plain English and just works. Worth every penny!"</p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="#" class="text-primary font-semibold hover:underline">See more customer stories →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Affordable Pricing for Every Business</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Plan 1 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition duration-300 border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Basic</h3>
+                    <p class="text-gray-600 mb-6">Perfect for small websites</p>
+                    <div class="text-4xl font-bold text-gray-800 mb-6">$19<span class="text-lg font-normal">/month</span></div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Security Scanning</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Daily Backups</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Uptime Monitoring</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html" class="block w-full bg-primary hover:bg-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-300">Start Free Trial</a>
+</div>
+                
+                <!-- Plan 2 (Featured) -->
+                <div class="bg-white p-8 rounded-xl shadow-md border-2 border-primary relative">
+                    <div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg">MOST POPULAR</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Pro</h3>
+                    <p class="text-gray-600 mb-6">For growing businesses</p>
+                    <div class="text-4xl font-bold text-gray-800 mb-6">$49<span class="text-lg font-normal">/month</span></div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Everything in Basic</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Smart Updater</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>AI Content Assistant</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Priority Support</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html" class="block w-full bg-primary hover:bg-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-300">Start Free Trial</a>
+</div>
+                
+                <!-- Plan 3 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm **shadow-gray-400/30** hover:shadow-md **hover:shadow-blue-500/50** transition duration-300 border border-gray-200">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Agency</h3>
+                    <p class="text-gray-600 mb-6">For web professionals</p>
+                    <div class="text-4xl font-bold text-gray-800 mb-6">$199<span class="text-lg font-normal">/month</span></div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Everything in Pro</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>Manage Multiple Sites</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>White Label Reports</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i data-feather="check" class="text-green-500 mr-2 w-5 h-5"></i>
+                            <span>24/7 VIP Support</span>
+                        </li>
+                    </ul>
+                    <a href="/login.html" class="block w-full bg-primary hover:bg-blue-600 text-white text-center font-bold py-3 px-6 rounded-lg transition duration-300">Start Free Trial</a>
+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-6 max-w-3xl">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">Frequently Asked Questions</h2>
+            
+            <div class="space-y-6">
+                <!-- FAQ 1 -->
+                <div class="border-b border-gray-200 pb-6">
+                    <button class="faq-toggle flex justify-between items-center w-full text-left">
+                        <h3 class="text-xl font-bold text-gray-800">How does the Smart Updater work?</h3>
+                        <i data-feather="chevron-down" class="text-gray-500 w-6 h-6"></i>
+                    </button>
+                    <div class="faq-content mt-4 text-gray-600 hidden">
+                        <p>Our Smart Updater first creates a backup of your site, then tests all updates in a secure environment before applying them to your live site. If anything goes wrong, it automatically rolls back to the previous version.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ 2 -->
+                <div class="border-b border-gray-200 pb-6">
+                    <button class="faq-toggle flex justify-between items-center w-full text-left">
+                        <h3 class="text-xl font-bold text-gray-800">Is my website data safe with SiteSentry AI?</h3>
+                        <i data-feather="chevron-down" class="text-gray-500 w-6 h-6"></i>
+                    </button>
+                    <div class="faq-content mt-4 text-gray-600 hidden">
+                        <p>Absolutely. We use enterprise-grade encryption for all data transfers and storage. Backups are stored in secure, geographically distributed data centers with strict access controls.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ 3 -->
+                <div class="border-b border-gray-200 pb-6">
+                    <button class="faq-toggle flex justify-between items-center w-full text-left">
+                        <h3 class="text-xl font-bold text-gray-800">What happens if my website goes down?</h3>
+                        <i data-feather="chevron-down" class="text-gray-500 w-6 h-6"></i>
+                    </button>
+                    <div class="faq-content mt-4 text-gray-600 hidden">
+                        <p>Our system immediately detects downtime and notifies you via email and SMS. For Pro and Agency plans, we'll automatically attempt to restore from the most recent backup if the issue persists beyond 15 minutes.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-10">
+                <a href="#" class="text-primary font-semibold hover:underline">View all FAQs →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-16 bg-primary text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Stop Worrying About Your Website?</h2>
+            <p class="text-xl opacity-90 mb-8 max-w-2xl mx-auto">Join thousands of business owners who trust SiteSentry AI to keep their websites secure and running smoothly.</p>
+            <a href="/login.html" class="bg-white hover:bg-gray-100 text-primary font-bold py-3 px-8 rounded-full transition duration-300 shadow-lg inline-block">Start Your Free 14-Day Trial</a>
+</div>
+    </section>
+
+    <custom-footer></custom-footer>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script src="script.js"></script>
+    <script>
+        feather.replace();
+        
+        // Initialize Vanta.js background
+        VANTA.GLOBE({
+            el: "#hero .vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x3b82f6,
+            backgroundColor: 0x111827,
+            size: 0.8
+        });
+
+        // FAQ toggle functionality
+        document.querySelectorAll('.faq-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('i');
+                
+                content.classList.toggle('hidden');
+                icon.setAttribute('data-feather', content.classList.contains('hidden') ? 'chevron-down' : 'chevron-up');
+                feather.replace();
+            });
+        });
+    </script>
+<script src="https://huggingface.co/deepsite/deepsite-badge.js"></script>
+</body>
+</html>

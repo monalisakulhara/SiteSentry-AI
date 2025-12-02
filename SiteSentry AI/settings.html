@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Account Settings</h1>
+                    <p class="text-gray-600">Manage your profile and preferences.</p>
+                </div>
+
+                <div class="space-y-8 max-w-2xl">
+                    <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h2 class="text-xl font-bold mb-4">Profile</h2>
+                        <div class="space-y-4">
+                             <div>
+                                <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                                <p id="profile-email" class="mt-1 text-gray-900">Loading...</p>
+                            </div>
+                            </div>
+                    </div>
+
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h2 class="text-xl font-bold mb-4">Change Password</h2>
+                        <form id="change-password-form" class="space-y-4">
+                             <div>
+                                <label for="current-password" class="block text-sm font-medium text-gray-700">Current Password</label>
+                                <input type="password" id="current-password" class="w-full px-3 py-2 border rounded-lg" required>
+                            </div>
+                             <div>
+                                <label for="new-password" class="block text-sm font-medium text-gray-700">New Password</label>
+                                <input type="password" id="new-password" class="w-full px-3 py-2 border rounded-lg" required minlength="8">
+                            </div>
+                             <div>
+                                <label for="confirm-new-password" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                                <input type="password" id="confirm-new-password" class="w-full px-3 py-2 border rounded-lg" required>
+                            </div>
+                            <div id="password-message-area" class="text-sm"></div>
+                            <button type="submit" class="bg-primary border border-gray-300 hover:bg-blue-600 text-black font-bold py-2 px-4 rounded-lg">Update Password</button>
+                        </form>
+                    </div>
+
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                         <h2 class="text-xl font-bold mb-4">Notification Preferences</h2>
+                         <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="notify-downtime" class="rounded text-primary focus:ring-primary">
+                                <span class="ml-2 text-gray-700">Email me for website downtime alerts</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="notify-scan" class="rounded text-primary focus:ring-primary">
+                                <span class="ml-2 text-gray-700">Email me when security scans find issues</span>
+                            </label>
+                             <button id="save-notifications-btn" class="mt-4 border border-gray-300 bg-primary hover:bg-blue-600 text-blacl font-bold py-2 px-4 rounded-lg">Save Preferences</button>
+                             <div id="notify-message-area" class="text-sm mt-2"></div>
+                         </div>
+                    </div>
+
+                     <div class="bg-white p-6 rounded-xl shadow-sm border border-red-200">
+                        <h2 class="text-xl font-bold mb-4 text-red-600">Delete Account</h2>
+                        <p class="text-gray-600 mb-4">Permanently delete your account and all associated data. This action cannot be undone.</p>
+                        <button id="delete-account-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Delete My Account</button>
+                    </div>
+
+                </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script> <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace(); // Render icons
+
+            // --- Authentication Check ---
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) {
+                window.location.href = '/login.html'; // Redirect if not logged in
+                return; // Stop execution
+            }
+            // Prepare Axios headers for authenticated requests
+            const authHeaders = { headers: { 'Authorization': `Bearer ${token}` } };
+
+            // --- Get DOM Elements ---
+            const emailEl = document.getElementById('profile-email');
+            const passwordForm = document.getElementById('change-password-form');
+            const passwordMessageArea = document.getElementById('password-message-area');
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            const saveNotificationsBtn = document.getElementById('save-notifications-btn');
+            const notifyMessageArea = document.getElementById('notify-message-area');
+            // Add references to notification checkboxes if needed
+
+            // --- Load User Profile Info ---
+            async function loadProfile() {
+                if (!emailEl) return;
+                emailEl.textContent = 'Loading...';
+                try {
+                    // Call the GET /api/users/me route
+                    const response = await axios.get('/api/users/me', authHeaders);
+                    emailEl.textContent = response.data.email || 'Error loading email';
+                    // TODO: Fetch and display current notification preferences from backend if implemented
+                } catch (error) {
+                    console.error("Error loading profile:", error);
+                    emailEl.textContent = 'Error loading profile.';
+                    // Handle potential 401/403 errors (e.g., redirect to login)
+                    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                        localStorage.removeItem('siteSentryToken');
+                        window.location.href = '/login.html';
+                    }
+                }
+            }
+
+            // --- Handle Password Change Form ---
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!passwordMessageArea) return;
+                    passwordMessageArea.textContent = ''; // Clear previous messages
+                    const currentPassword = document.getElementById('current-password').value;
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                    // Frontend Validation
+                    if (newPassword !== confirmNewPassword) {
+                        passwordMessageArea.textContent = 'New passwords do not match.';
+                        passwordMessageArea.style.color = 'red';
+                        return;
+                    }
+                    if (newPassword.length < 8) {
+                       passwordMessageArea.textContent = 'New password must be at least 8 characters.';
+                       passwordMessageArea.style.color = 'red';
+                       return;
+                    }
+
+                    try {
+                        passwordMessageArea.textContent = 'Updating...'; passwordMessageArea.style.color = 'gray';
+                        // Call the PUT /api/users/password route
+                        await axios.put('/api/users/password',
+                            { currentPassword, newPassword }, // Send data in request body
+                            authHeaders // Send auth token
+                        );
+                        passwordMessageArea.textContent = 'Password updated successfully!';
+                        passwordMessageArea.style.color = 'green';
+                        passwordForm.reset(); // Clear form fields
+                    } catch (error) {
+                        console.error("Error changing password:", error);
+                        passwordMessageArea.textContent = error.response?.data?.error || 'Failed to update password. Please check current password.';
+                        passwordMessageArea.style.color = 'red';
+                    }
+                });
+            }
+
+            // --- Handle Delete Account Button ---
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', async () => {
+                    if (!confirm('Are you absolutely sure you want to delete your account? This will remove all your sites and data permanently.')) {
+                        return;
+                    }
+                    if (!confirm('FINAL CONFIRMATION: Delete account? This cannot be undone.')) {
+                        return;
+                    }
+                    try {
+                        // Call the DELETE /api/users/me route
+                        await axios.delete('/api/users/me', authHeaders);
+
+                        // Clear token and redirect on success
+                        localStorage.removeItem('siteSentryToken');
+                        alert('Account deleted successfully.');
+                        window.location.href = '/'; // Redirect to homepage
+
+                    } catch (error) {
+                        console.error("Error deleting account:", error);
+                        alert(error.response?.data?.error || 'Failed to delete account. Please contact support.');
+                    }
+                });
+            }
+
+            // --- Handle Notification Preferences (Placeholder) ---
+            if (saveNotificationsBtn) {
+                 saveNotificationsBtn.addEventListener('click', async () => {
+                     if (!notifyMessageArea) return;
+                     notifyMessageArea.textContent = 'Saving...'; notifyMessageArea.style.color = 'gray';
+                     const downtimePref = document.getElementById('notify-downtime')?.checked;
+                     const scanPref = document.getElementById('notify-scan')?.checked;
+                     console.log("Notification Prefs:", { downtime: downtimePref, scan: scanPref });
+                     try {
+                         // TODO: Create PUT /api/users/preferences route
+                         // await axios.put('/api/users/preferences', { downtimePref, scanPref }, authHeaders);
+                         notifyMessageArea.textContent = 'Preferences saved successfully! (Simulation)';
+                         notifyMessageArea.style.color = 'green';
+                         setTimeout(() => { notifyMessageArea.textContent = ''; }, 3000);
+                     } catch (error) {
+                          console.error("Error saving preferences:", error);
+                          notifyMessageArea.textContent = error.response?.data?.error || 'Failed to save preferences.';
+                          notifyMessageArea.style.color = 'red';
+                     }
+                 });
+             }
+
+
+            // --- Initial Load ---
+            loadProfile();
+
+        }); // End DOMContentLoaded listener
+    </script>
+</body>
+</html>

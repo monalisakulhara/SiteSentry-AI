@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scans - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Security Scans</h1>
+                        <p class="text-gray-600">View scan history and check for vulnerabilities.</p>
+                    </div>
+                     <button id="manual-scan-btn" class="bg-red-600 hover:bg-red-700 text-white text-center font-bold py-2 px-4 rounded-lg flex items-center">
+                        <i data-feather="shield-alert" class="w-5 h-5 mr-2"></i>
+                        Run Manual Scan
+                    </button>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h2 class="text-xl font-bold mb-4">Scan History</h2>
+                    <div id="scan-list" class="overflow-x-auto">
+                        <p class="text-gray-500">Loading scan history...</p>
+                        </div>
+                </div>
+
+                 <div id="scan-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden flex items-center justify-center">
+                    <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+                         <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">Scan Details (<span id="scan-details-date"></span>)</h3>
+                            <button id="close-scan-details-btn"><i data-feather="x"></i></button>
+                        </div>
+                        <div id="scan-details-content">
+                            <p>Loading details...</p>
+                        </div>
+                    </div>
+                 </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+            const scanListDiv = document.getElementById('scan-list');
+            const manualScanBtn = document.getElementById('manual-scan-btn');
+            const detailsModal = document.getElementById('scan-details-modal');
+            const closeDetailsBtn = document.getElementById('close-scan-details-btn');
+            const detailsDateEl = document.getElementById('scan-details-date');
+            const detailsContentEl = document.getElementById('scan-details-content');
+
+            async function loadScans() {
+                scanListDiv.innerHTML = '<p class="text-gray-500">Loading scan history...</p>';
+                try {
+                    // TODO: Create GET /api/security/scans route
+                    const response = await axios.get('/api/security/scans', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const scans = response.data;
+
+                    if (!scans || scans.length === 0) {
+                        scanListDiv.innerHTML = '<p class="text-gray-500">No scans performed yet.</p>';
+                        return;
+                    }
+
+                    scanListDiv.innerHTML = `
+                         <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr><th ...>Date</th><th ...>Status</th><th ...>Infected</th><th ...>Suspicious</th><th ...>Actions</th></tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${scans.map(s => {
+                                    let statusText = s.status;
+                                    let statusColor = 'gray';
+                                    if (s.status === 'success') {
+                                        statusText = s.infectedFiles > 0 ? 'Infected' : (s.suspiciousFiles > 0 ? 'Suspicious' : 'Clean');
+                                        statusColor = s.infectedFiles > 0 ? 'red' : (s.suspiciousFiles > 0 ? 'yellow' : 'green');
+                                    } else {
+                                        statusColor = 'red';
+                                    }
+                                    return `
+                                    <tr>
+                                        <td ...>${new Date(s.createdAt).toLocaleString()}</td>
+                                        <td ...>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${statusColor}-100 text-${statusColor}-800">
+                                                ${statusText}
+                                            </span>
+                                        </td>
+                                        <td ...>${s.infectedFiles ?? '--'}</td>
+                                        <td ...>${s.suspiciousFiles ?? '--'}</td>
+                                        <td ...>
+                                            ${s.status !== 'failed' ? `<button onclick="viewScanDetails('${s._id}')" class="text-primary hover:text-blue-700">View Details</button>` : ''}
+                                        </td>
+                                    </tr>
+                                `}).join('')}
+                            </tbody></table>`;
+                    feather.replace();
+                } catch (error) {
+                    console.error("Error loading scans:", error);
+                    scanListDiv.innerHTML = '<p class="text-red-500">Failed to load scan history.</p>';
+                }
+            }
+
+            // Function to view details
+             window.viewScanDetails = async (scanId) => {
+                 detailsDateEl.textContent = 'Loading...';
+                 detailsContentEl.innerHTML = '<p>Loading details...</p>';
+                 detailsModal.classList.remove('hidden');
+                 try {
+                     // TODO: Create GET /api/security/scans/:id route
+                     const response = await axios.get(`/api/security/scans/${scanId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                     const scan = response.data;
+                     detailsDateEl.textContent = new Date(scan.createdAt).toLocaleDateString();
+                     // TODO: Format scan details better (list infected files etc.)
+                     detailsContentEl.innerHTML = `<pre>${JSON.stringify(scan, null, 2)}</pre>`;
+                 } catch (error) {
+                     console.error("Error loading scan details:", error);
+                     detailsContentEl.innerHTML = '<p class="text-red-500">Failed to load details.</p>';
+                 }
+            }
+
+             // Modal close buttons
+             closeDetailsBtn.addEventListener('click', () => detailsModal.classList.add('hidden'));
+             detailsModal.addEventListener('click', (e) => { if(e.target === detailsModal) detailsModal.classList.add('hidden'); });
+
+            // Manual scan button
+             manualScanBtn.addEventListener('click', async () => {
+                 if (!confirm('Run a security scan now? This may take several minutes.')) return;
+                 manualScanBtn.disabled = true;
+                 manualScanBtn.innerHTML = '<i data-feather="loader" class="animate-spin w-5 h-5 mr-2"></i>Scanning...';
+                 feather.replace();
+                 try {
+                     // TODO: Create POST /api/security/scan route (or use automation one?)
+                     await axios.post('/api/automation/run-scans', {}, { headers: { 'Authorization': `Bearer ${token}` } }); // Adjust endpoint if needed
+                     alert('Manual scan initiated. It may take several minutes. Refreshing list when done...');
+                     // Optionally, poll for results or wait a fixed time
+                     setTimeout(loadScans, 10000); // Refresh list after 10s
+                 } catch (error) {
+                     console.error("Error initiating manual scan:", error);
+                     alert('Failed to start manual scan.');
+                 } finally {
+                     manualScanBtn.disabled = false;
+                     manualScanBtn.innerHTML = '<i data-feather="shield-alert" class="w-5 h-5 mr-2"></i>Run Manual Scan';
+                     feather.replace();
+                 }
+             });
+
+
+            loadScans(); // Initial load
+        });
+    </script>
+</body>
+</html>

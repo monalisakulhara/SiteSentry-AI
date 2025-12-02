@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - SiteSentry AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+<body class="bg-gray-50">
+    <custom-navbar></custom-navbar>
+    <div class="pt-16">
+        <custom-sidebar></custom-sidebar>
+        <div class="ml-72 content-wrapper"> <main class="flex-1 p-8">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800">Billing</h1>
+                    <p class="text-gray-600">Manage your subscription and payment details.</p>
+                </div>
+
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                        <h2 class="text-xl font-bold mb-4">Current Plan</h2>
+                        <div id="current-plan-info">
+                            <p class="text-gray-500">Loading plan details...</p>
+                        </div>
+                        <button class="mt-4 text-primary hover:underline">Change Plan</button>
+                    </div>
+
+                     <div class="bg-white p-6 rounded-xl shadow-sm">
+                         <h2 class="text-xl font-bold mb-4">Payment Method</h2>
+                         <div id="payment-method-info">
+                            <p class="text-gray-500">Loading payment details...</p>
+                         </div>
+                          <button class="mt-4 text-primary hover:underline">Update Payment Method</button>
+                    </div>
+                </div>
+
+                 <div class="bg-white p-6 rounded-xl shadow-sm mt-8">
+                    <h2 class="text-xl font-bold mb-4">Billing History</h2>
+                    <div id="billing-history">
+                         <p class="text-gray-500">Loading billing history...</p>
+                        </div>
+                 </div>
+
+            </main>
+            <custom-footer></custom-footer>
+        </div>
+    </div>
+
+    <script src="components/navbar.js"></script>
+    <script src="components/sidebar.js"></script>
+    <script src="components/footer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            const token = localStorage.getItem('siteSentryToken');
+            if (!token) window.location.href = '/login.html';
+
+            const planInfoDiv = document.getElementById('current-plan-info');
+            const paymentInfoDiv = document.getElementById('payment-method-info');
+            const historyDiv = document.getElementById('billing-history');
+
+            async function loadBillingData() {
+                 planInfoDiv.innerHTML = '<p class="text-gray-500">Loading plan details...</p>';
+                 paymentInfoDiv.innerHTML = '<p class="text-gray-500">Loading payment details...</p>';
+                 historyDiv.innerHTML = '<p class="text-gray-500">Loading billing history...</p>';
+                 try {
+                    // TODO: Create GET /api/billing/details route
+                    const response = await axios.get('/api/billing/details', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const billing = response.data;
+
+                    // Display Plan Info
+                    planInfoDiv.innerHTML = `
+                        <p><strong class="font-medium">${billing.planName || 'N/A'}</strong></p>
+                        <p class="text-gray-600">${billing.planPrice || '$0.00'} / ${billing.planInterval || 'month'}</p>
+                        <p class="text-sm text-gray-500 mt-2">Next payment: ${billing.nextPaymentDate ? new Date(billing.nextPaymentDate).toLocaleDateString() : 'N/A'}</p>
+                    `;
+
+                    // Display Payment Info (Example - depends on Stripe/Provider)
+                    paymentInfoDiv.innerHTML = `
+                         <p><strong class="font-medium">${billing.paymentMethod?.brand || 'N/A'}</strong> ending in ${billing.paymentMethod?.last4 || 'N/A'}</p>
+                         <p class="text-sm text-gray-500 mt-1">Expires ${billing.paymentMethod?.exp_month || '--'}/${billing.paymentMethod?.exp_year || '--'}</p>
+                    `;
+
+                    // Display Billing History
+                    if (!billing.history || billing.history.length === 0) {
+                         historyDiv.innerHTML = '<p class="text-gray-500">No billing history found.</p>';
+                    } else {
+                         historyDiv.innerHTML = `
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50"><tr><th ...>Date</th><th ...>Amount</th><th ...>Status</th><th ...>Invoice</th></tr></thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                ${billing.history.map(inv => `
+                                    <tr>
+                                        <td ...>${new Date(inv.date).toLocaleDateString()}</td>
+                                        <td ...>${inv.amount || '$--.--'}</td>
+                                        <td ...>${inv.status || 'N/A'}</td>
+                                        <td ...><a href="${inv.invoiceUrl || '#'}" target="_blank" class="text-primary hover:underline" ${!inv.invoiceUrl ? 'onclick="return false;" style="opacity:0.5; cursor:default;"' : ''}>View</a></td>
+                                    </tr>`).join('')}
+                                </tbody></table>`;
+                    }
+
+                 } catch (error) {
+                      console.error("Error loading billing data:", error);
+                      planInfoDiv.innerHTML = '<p class="text-red-500">Error loading plan.</p>';
+                      paymentInfoDiv.innerHTML = '<p class="text-red-500">Error loading payment method.</p>';
+                      historyDiv.innerHTML = '<p class="text-red-500">Error loading billing history.</p>';
+                 }
+            }
+
+            loadBillingData(); // Initial load
+        });
+    </script>
+</body>
+</html>
